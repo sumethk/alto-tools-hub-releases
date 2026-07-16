@@ -1,0 +1,70 @@
+name: Publish Staged Release
+
+on:
+  push:
+    branches:
+      - release-payloads
+
+permissions:
+  contents: write
+
+concurrency:
+  group: public-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout staged assets
+        uses: actions/checkout@v4
+
+      - name: Validate and publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $metadata = Get-Content release-metadata.json -Raw | ConvertFrom-Json
+          $tag = [string]$metadata.tag
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Invalid release tag: $tag"
+          }
+
+          $expectedAssets = @(
+            "AltoToolsHubSetup.msi",
+            "AltoToolsHubSetup.msi.sha256",
+            "Install-AltoToolsHub-MSI.cmd",
+            "Install-AltoToolsHub-MSI.ps1",
+            "AltoToolsHub-$tag-Windows.zip",
+            "AltoToolsHubUpdate.zip",
+            "AltoToolsHubUpdate.zip.sha256"
+          )
+          $actualAssets = @(Get-ChildItem release-assets -File | Select-Object -ExpandProperty Name | Sort-Object)
+          $expectedSorted = @($expectedAssets | Sort-Object)
+          if (Compare-Object $actualAssets $expectedSorted) {
+            throw "Staged release assets do not match the public allowlist."
+          }
+
+          foreach ($pair in @(
+            @{ File = "AltoToolsHubSetup.msi"; Checksum = "AltoToolsHubSetup.msi.sha256" },
+            @{ File = "AltoToolsHubUpdate.zip"; Checksum = "AltoToolsHubUpdate.zip.sha256" }
+          )) {
+            $filePath = Join-Path "release-assets" $pair.File
+            $checksumPath = Join-Path "release-assets" $pair.Checksum
+            $expectedHash = ((Get-Content $checksumPath -Raw).Trim() -split '\s+')[0].ToLowerInvariant()
+            $actualHash = (Get-FileHash $filePath -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actualHash -ne $expectedHash) {
+              throw "Checksum verification failed for $($pair.File)."
+            }
+          }
+
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            throw "Public release $tag already exists; refusing to overwrite it."
+          }
+          $assetPaths = $expectedAssets | ForEach-Object { Join-Path "release-assets" $_ }
+          gh release create $tag $assetPaths `
+            --repo $env:GITHUB_REPOSITORY `
+            --target $env:GITHUB_SHA `
+            --title "Alto Tools Hub $tag" `
+            --notes-file release-notes.md
