@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "product": "Alto Tools Hub",
+  "tag": "v1.1.55",
+  "version": "1.1.55",
+  "assets": [
+    "AltoToolsHubSetup.msi",
+    "AltoToolsHubSetup.msi.sha256",
+    "Install-AltoToolsHub-MSI.cmd",
+    "Install-AltoToolsHub-MSI.ps1",
+    "AltoToolsHub-v1.1.55-Windows.zip",
+    "AltoToolsHubUpdate.zip",
+    "AltoToolsHubUpdate.zip.sha256"
+  ]
+}
