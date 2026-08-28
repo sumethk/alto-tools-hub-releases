@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "product": "Alto Tools Hub",
+  "tag": "v1.2.43",
+  "version": "1.2.43",
+  "prerelease": false,
+  "assets": [
+    "AltoToolsHubSetup.msi",
+    "AltoToolsHubSetup.msi.sha256",
+    "Install-AltoToolsHub-MSI.cmd",
+    "Install-AltoToolsHub-MSI.ps1",
+    "AltoToolsHub-v1.2.43-Windows.zip",
+    "AltoToolsHubUpdate.zip",
+    "AltoToolsHubUpdate.zip.sha256"
+  ]
+}
