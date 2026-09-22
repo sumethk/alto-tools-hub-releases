@@ -37,6 +37,7 @@ jobs:
             "Install-AltoToolsHub-MSI.cmd",
             "Install-AltoToolsHub-MSI.ps1",
             "AltoToolsHub-$tag-Windows.zip",
+            "AltoToolsHub-$tag-Windows.zip.sha256",
             "AltoToolsHubUpdate.zip",
             "AltoToolsHubUpdate.zip.sha256"
           )
@@ -48,6 +49,7 @@ jobs:
 
           foreach ($pair in @(
             @{ File = "AltoToolsHubSetup.msi"; Checksum = "AltoToolsHubSetup.msi.sha256" },
+            @{ File = "AltoToolsHub-$tag-Windows.zip"; Checksum = "AltoToolsHub-$tag-Windows.zip.sha256" },
             @{ File = "AltoToolsHubUpdate.zip"; Checksum = "AltoToolsHubUpdate.zip.sha256" }
           )) {
             $filePath = Join-Path "release-assets" $pair.File
